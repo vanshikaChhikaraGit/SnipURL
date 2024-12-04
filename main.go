@@ -61,9 +61,7 @@ href="/r/%s" class="underline">%s</a></p>`,shortURL,fullShortURL)
 		http.Redirect(w,r,longURL,http.StatusPermanentRedirect)
 
 	})
-	port := os.Getenv("PORT")
-    if port == "" {
-        port = "8080" // fallback to 8080 if the PORT environment variable is not set
-    }
+	
+	port := "8080"
 	http.ListenAndServe(":"+port,nil)
 }
