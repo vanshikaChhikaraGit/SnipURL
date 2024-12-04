@@ -61,7 +61,16 @@ href="/r/%s" class="underline">%s</a></p>`,shortURL,fullShortURL)
 		http.Redirect(w,r,longURL,http.StatusPermanentRedirect)
 
 	})
-	
-	port := "8080"
-	http.ListenAndServe(":"+port,nil)
+	// Get the PORT from environment variables (Render sets it automatically)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080" // Default to 8080 if no PORT environment variable is set (useful for local development)
+	}
+
+	// Start the server on the correct port
+	fmt.Printf("Server is running on port %s\n", port)
+	err = http.ListenAndServe(":"+port, nil)
+	if err != nil {
+		fmt.Println("Error starting the server:", err)
+	}
 }
