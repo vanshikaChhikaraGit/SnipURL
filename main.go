@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"os"
 	"text/template"
-
-	"github.com/joho/godotenv"
 )
 
 // Global port variable
@@ -18,13 +16,8 @@ var ctx = context.Background()
 
 // Global function to initialize the application settings
 func init() {
-	// Load environment variables
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Println("Error loading .env file")
-	}
-
-	// Get the BASE_URL from the environment
+	
+// Get the BASE_URL from the environment
 	BASE_URL := os.Getenv("BASE_URL")
 
 	// Connect to Redis (ensure that Redis is properly configured in the environment variables)
@@ -82,7 +75,7 @@ func init() {
 func main() {
 	// Start the server on the correct port
 	fmt.Printf("Server is running on port %s\n", port)
-	err := http.ListenAndServe(":"+port, nil)
+	err := http.ListenAndServe("0.0.0.0:"+port, nil)
 	if err != nil {
 		fmt.Println("Error starting the server:", err)
 	}
