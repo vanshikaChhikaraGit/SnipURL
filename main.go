@@ -29,7 +29,7 @@ func init() {
 
 	// Setup routes
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		tmp := template.Must(template.ParseFiles("template/index.html"))
+		tmp := template.Must(template.ParseFiles("index.html"))
 		tmp.Execute(w, nil)
 	})
 
