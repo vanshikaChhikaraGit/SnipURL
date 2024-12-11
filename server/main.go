@@ -15,7 +15,7 @@ var ctx = context.Background()
 
 func corsMiddleware(next http.Handler)http.Handler{
 return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
-w.Header().Set("Access-Control-Allow-Origin", "https://your-frontend.vercel.app")
+w.Header().Set("Access-Control-Allow-Origin", "https://snip-url-six.vercel.app")
 w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 // Preflight request
