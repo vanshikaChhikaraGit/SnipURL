@@ -18,7 +18,7 @@
             <h1 class="text-3xl font-semibold mb-6 text-center p-2 rounded-md">
                 Snip URL
             </h1>
-            <form id="shortenForm" hx-target="#result" hx-swap="innerHTML">
+            <form id="shortenForm">
                 <div class="mb-4">
                     <input 
                         type="url" 
@@ -73,9 +73,36 @@
                     // Check if there's a shortened URL in the response
                     if (result.shortUrl) {
                         // Update the result section with the shortened URL
-                        document.getElementById('result').innerHTML = `<p class="mt-4 text-green-600">Shortened URL: <a href="${result.shortUrl}" class="underline" target="_blank">${result.shortUrl}</a></p>`;
+                        document.getElementById('result').innerHTML = `
+                            <p class="mt-4 text-green-600">
+                                Shortened URL: 
+                                <span id="shortenedLink" class="underline cursor-pointer">${result.shortUrl}</span>
+                            </p>
+                        `;
+
+                        // Add event listener to handle click and make the backend request
+                        document.getElementById('shortenedLink').addEventListener('click', async (event) => {
+                            event.preventDefault(); // Prevent default behavior (link clicking)
+                            
+                            // Send the short URL to the backend to resolve
+                            const response = await fetch(`/r/${result.shortCode}`, {
+                                method: 'GET',
+                            });
+
+                            // If the backend returns a redirect, handle it
+                            if (response.ok) {
+                                const longUrl = await response.text();
+                                window.location.href = longUrl; // Redirect the user to the long URL
+                            } else {
+                                document.getElementById('result').innerHTML = `
+                                    <p class="mt-4 text-red-600">Error: Unable to resolve the shortened URL. Please try again.</p>
+                                `;
+                            }
+                        });
                     } else {
-                        document.getElementById('result').innerHTML = `<p class="mt-4 text-red-600">Error: Unable to shorten the URL. Please try again.</p>`;
+                        document.getElementById('result').innerHTML = `
+                            <p class="mt-4 text-red-600">Error: Unable to shorten the URL. Please try again.</p>
+                        `;
                     }
                 } catch (error) {
                     document.getElementById('loading').classList.add('hidden');
