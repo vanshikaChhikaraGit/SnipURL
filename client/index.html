@@ -71,7 +71,7 @@
                     const result = await response.json(); // Parse JSON response
 
                     // Check if there's a shortened URL in the response
-                    if (result.shortenedUrl) {
+                    if (result.shortUrl) {
                         // Update the result section with the shortened URL
                         document.getElementById('result').innerHTML = `<p class="mt-4 text-green-600">Shortened URL: <a href="${result.shortenedUrl}" class="underline" target="_blank">${result.shortenedUrl}</a></p>`;
                     } else {
