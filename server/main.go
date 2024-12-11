@@ -6,13 +6,27 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"text/template"
 )
 
 // Global port variable
 var port string
 
 var ctx = context.Background()
+
+func corsMiddleware(next http.Handler)http.Handler{
+return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
+w.Header().Set("Access-Control-Allow-Origin", "https://your-frontend.vercel.app")
+w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+// Preflight request
+if r.Method == http.MethodOptions {
+	w.WriteHeader(http.StatusNoContent)
+	return
+}
+
+next.ServeHTTP(w, r)
+})
+}
 
 // Global function to initialize the application settings
 func init() {
@@ -28,10 +42,10 @@ func init() {
 	}
 
 	// Setup routes
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		tmp := template.Must(template.ParseFiles("index.html"))
-		tmp.Execute(w, nil)
-	})
+	// http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	// 	tmp := template.Must(template.ParseFiles("client/index.html"))
+	// 	tmp.Execute(w, nil)
+	// })
 
 	http.HandleFunc("/shortenURL", func(w http.ResponseWriter, r *http.Request) {
 		url := r.FormValue("url")
@@ -44,7 +58,9 @@ func init() {
 
 		utils.SetKey(&ctx, rdb, shortURL, url)
 
-		fmt.Fprintf(w, `<p class="mt-4 text-green-600">Shortened URL: <a href="/r/%s" class="underline">%s</a></p>`, shortURL, fullShortURL)
+		// Set content type to JSON and return the response
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"shortUrl": "%s"}`, fullShortURL)
 	})
 
 	http.HandleFunc("/r/", func(w http.ResponseWriter, r *http.Request) {

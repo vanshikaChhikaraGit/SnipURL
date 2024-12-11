@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content="SnipURL - A simple URL shortening service" />
+        <meta property="og:title" content="SnipURL" />
+        <meta property="og:description" content="Shorten your URLs quickly and easily." />
+        <meta property="og:image" content="assets/url-shortener-logo-hd-png.png" />
+        <meta property="og:url" content="https://snipurl-y5f4.onrender.com" />
+        <title>SnipURL</title>
+        <link rel="icon" href="client/assets/url-shortener-logo-hd-png.png" type="image/x-icon">
+        <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="bg-gray-900 min-h-screen flex items-center justify-center">
+        <div class="bg-gray-800 text-white p-8 rounded-lg shadow-lg w-full max-w-md">
+            <h1 class="text-3xl font-semibold mb-6 text-center p-2 rounded-md">
+                Snip URL
+            </h1>
+            <form id="shortenForm" hx-target="#result" hx-swap="innerHTML">
+                <div class="mb-4">
+                    <input 
+                        type="url" 
+                        name="url" 
+                        placeholder="Enter URL to shorten" 
+                        class="w-full p-3 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-600" 
+                        required 
+                    />
+                </div>
+                <button 
+                    type="submit" 
+                    class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 rounded-md hover:bg-gradient-to-l hover:from-purple-600 hover:to-indigo-600 focus:outline-none focus:ring-4 focus:ring-indigo-300"
+                >
+                    Shorten URL
+                </button>
+                <div id="loading" class="hidden mt-4 text-indigo-500">Processing...</div>
+            </form>
+            <div id="result" class="mt-6 text-center text-gray-400"></div>
+        </div>
+        <script>
+            // Show loading indicator while processing
+            document.querySelector('#shortenForm').addEventListener('submit', async (event) => {
+                event.preventDefault(); // Prevent the default form submission
+
+                // Show loading spinner
+                document.getElementById('loading').classList.remove('hidden');
+
+                const form = event.target;
+                const url = form.url.value;
+
+                try {
+                    // Send the URL to the backend using fetch
+                    const response = await fetch('https://snipurl-y5f4.onrender.com/shortenURL', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams({
+                            'url': url,
+                        }),
+                    });
+
+                    // Hide loading spinner after response is received
+                    document.getElementById('loading').classList.add('hidden');
+
+                    if (!response.ok) {
+                        throw new Error('Failed to shorten URL');
+                    }
+
+                    const result = await response.json(); // Parse JSON response
+
+                    // Check if there's a shortened URL in the response
+                    if (result.shortenedUrl) {
+                        // Update the result section with the shortened URL
+                        document.getElementById('result').innerHTML = `<p class="mt-4 text-green-600">Shortened URL: <a href="${result.shortenedUrl}" class="underline" target="_blank">${result.shortenedUrl}</a></p>`;
+                    } else {
+                        document.getElementById('result').innerHTML = `<p class="mt-4 text-red-600">Error: Unable to shorten the URL. Please try again.</p>`;
+                    }
+                } catch (error) {
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('result').innerHTML = `<p class="mt-4 text-red-600">${error.message}</p>`;
+                }
+            });
+        </script>
+    </body>
+</html>
