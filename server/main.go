@@ -50,36 +50,47 @@ func init() {
 	http.HandleFunc("/shortenURL", func(w http.ResponseWriter, r *http.Request) {
 		url := r.FormValue("url")
 		fmt.Println("Input URL:", url)
-		shortURL := utils.ShortenURL(url)
-		fmt.Println("Short code for the given URL is:", shortURL)
-		fullShortURL := fmt.Sprintf("%s/r/%s", BASE_URL, shortURL)
-
+	
+		// Shorten the URL
+		shortCode := utils.ShortenURL(url)
+		fmt.Println("Short code for the given URL is:", shortCode)
+	
+		// Build the full shortened URL
+		fullShortURL := fmt.Sprintf("%s/r/%s", BASE_URL, shortCode)
 		fmt.Println("Shortened URL is:", fullShortURL)
-
-		utils.SetKey(&ctx, rdb, shortURL, url)
-
-		// Set content type to JSON and return the response
+	
+		// Store the original URL with the shortened code in Redis
+		utils.SetKey(&ctx, rdb, shortCode, url)
+	
+		// Return the shortened URL and shortCode in the response as JSON
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintf(w, `{"shortUrl": "%s"}`, fullShortURL)
+		fmt.Fprintf(w, `{"shortUrl": "%s", "shortCode": "%s"}`, fullShortURL, shortCode)
 	})
+	
 
 	http.HandleFunc("/r/", func(w http.ResponseWriter, r *http.Request) {
 		pathURL := r.URL.Path
 		shortCode := pathURL[len("/r/"):]
-		fmt.Println(shortCode)
+	
+		fmt.Println("Short code:", shortCode)
+	
+		// Ensure short code is valid
 		if shortCode == "" {
 			http.Error(w, "Invalid URL", http.StatusBadRequest)
 			return
 		}
+	
+		// Retrieve the original long URL from Redis
 		longURL, err := utils.GetLongUrl(&ctx, rdb, shortCode)
 		if err != nil {
 			http.Error(w, "URL not found", http.StatusNotFound)
 			return
 		}
-
+	
+		// Redirect to the original URL
 		http.Redirect(w, r, longURL, http.StatusPermanentRedirect)
 	})
-
+	
 	// Get the PORT from environment variables (Render sets it automatically)
 	port = os.Getenv("PORT")
 	if port == "" {
